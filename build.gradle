@@ -1,0 +1,62 @@
+import io.swagger.codegen.DefaultGenerator
+import io.swagger.codegen.config.CodegenConfigurator
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'maven'
+apply plugin: 'maven-publish'
+buildscript {
+    ext {
+        springBootVersion = '2.1.3.RELEASE'
+    }
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+        classpath('io.swagger:swagger-codegen:2.4.1')
+        classpath("org.springframework.boot:spring-boot-starter-web:${springBootVersion}")
+        
+    }
+}
+repositories {
+    mavenCentral()
+}
+dependencies{
+    implementation("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+    implementation("org.springframework.boot:spring-boot-starter-web:${springBootVersion}",
+            "io.springfox:springfox-swagger2:2.7.0",
+            "io.springfox:springfox-swagger-ui:2.7.0",
+            "joda-time:joda-time:2.10"
+    )
+}
+configurations {
+    swagger
+}
+group 'com.pradeep'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.8
+
+
+
+//def swaggerOutputDirectory=file("build")
+task generateMicroService{
+//    outputs.dir(swaggerOutputDirectory)
+    doLast{
+        def config= new CodegenConfigurator()
+        config.setInputSpec("/Users/pradeep/projects/swagger-micro/specs/pet-store.json")
+        config.setLang("spring")
+        config.additionalProperties = [
+                'modelPackage' :'com.petstore.generated.model',
+                'apiPackage':'com.petstore.generated.api',
+                'invokerPackage':'com.petstore.generated',
+                'configPackage':'com.petstore.generated.configuration',
+                'interfaceOnly':'false',
+                'dateLibrary':'joda'
+        ]
+        DefaultGenerator generator = new DefaultGenerator().opts(config.toClientOptInput())
+        generator.generate()
+    }
+}
